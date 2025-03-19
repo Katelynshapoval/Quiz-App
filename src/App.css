@@ -1,0 +1,258 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Fonts */
+@font-face {
+  font-family: Arial-Rounded;
+  src: url("fonts/Arial-Rounded.ttf");
+}
+
+@font-face {
+  font-family: Arial-Rounded-Light;
+  src: url("fonts/Arial-Rounded-Light.ttf");
+}
+
+body {
+  background-color: #b547ce;
+  font-family: "Arial-Rounded-Light", sans-serif;
+}
+
+.Quiz {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+.questionContainer {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 20px;
+  width: 40%;
+  min-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: space-between;
+  min-height: 80%;
+  justify-content: space-between;
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.heading #left {
+  display: flex;
+  align-items: center;
+}
+
+#left h1 {
+  font-size: 22px;
+  font-weight: normal;
+}
+
+#prevQuestionButton {
+  border: none;
+  outline: none;
+  height: 25px;
+  font-size: 25px;
+  cursor: pointer;
+  margin-right: 10px;
+  border-radius: 6px;
+  background-color: rgb(243, 233, 243);
+}
+
+#prevQuestionButton:hover {
+  background-color: rgb(222, 202, 223);
+}
+
+.progress-bar-container {
+  width: 100%;
+  height: 8px;
+  background-color: #e0e0e0;
+  border-radius: 4px;
+  margin: 10px 0;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background-color: #cdaad5;
+  transition: width 0.3s ease-in-out;
+}
+
+.time {
+  display: flex;
+  align-items: center;
+}
+
+.time p {
+  margin-left: 3px;
+}
+
+.question {
+  height: 70%;
+}
+
+.question h2 {
+  margin-bottom: 15px;
+}
+
+.option input[type="radio"] {
+  display: none;
+}
+
+.option {
+  width: 100%;
+  margin-bottom: 5px;
+  border: 1px solid #d9d2d9;
+  border-radius: 8px;
+}
+
+.option label {
+  width: 100%;
+}
+
+.checked {
+  border: 1px solid #9100b6;
+  background-color: #eddcf1;
+}
+
+.option {
+  cursor: pointer;
+  display: block;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.option:hover {
+  background-color: #f3f3f4;
+  border: 1px solid #9100b6;
+}
+
+.options {
+  margin-bottom: 40px;
+}
+
+.checkmark {
+  display: inline-block;
+  border: 1px solid #d9d2d9;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  position: relative;
+  transition: all 0.3s ease-in-out;
+}
+
+.checked .checkmark {
+  border-color: rgb(81, 8, 86);
+}
+
+.check-icon {
+  font-size: 13px;
+  color: rgb(117, 0, 128);
+  position: absolute;
+  top: 0px;
+  left: 3.5px;
+  opacity: 0;
+  transform: scale(0);
+  transition: all 0.3s ease-in-out;
+}
+
+.checked-animate .check-icon {
+  opacity: 1;
+  transform: scale(1);
+}
+
+#nextQuestionButton {
+  padding: 14px;
+  border-radius: 10px;
+  border: none;
+  background-color: black;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  cursor: pointer;
+}
+
+#nextQuestionButton:hover {
+  background-color: #333;
+}
+
+.results {
+  background-color: white;
+  padding: 30px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 80%;
+  width: 70%;
+  min-width: 400px;
+  max-width: 600px;
+  gap: 45px;
+}
+.questionsAnswers {
+  height: 60%;
+  overflow-y: scroll;
+  -ms-overflow-style: none; /* Hides scrollbar on Internet Explorer and Edge */
+  scrollbar-width: none; /* Hides scrollbar on Firefox */
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.questionsAnswers::-webkit-scrollbar {
+  display: none; /* Hides the scrollbar on WebKit browsers (Chrome, Safari) */
+}
+
+.questionAnswer {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 10px;
+}
+
+.optionsAnswer {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.optionAnswer {
+  padding: 5px;
+  border-radius: 6px;
+  border: 1px solid #f1d4f1;
+}
+
+.correct {
+  border: 2px solid rgb(97, 216, 145);
+}
+
+.wrong {
+  border: 2px solid rgb(222, 109, 109);
+}
+
+#goToMainButton {
+  padding: 8px;
+  border-radius: 10px;
+  border: none;
+  outline: none;
+  color: white;
+  background-color: black;
+}
+#goToMainButton:hover {
+  background-color: #333;
+  cursor: pointer;
+}
