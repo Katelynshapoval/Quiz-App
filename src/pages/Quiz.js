@@ -1,54 +1,59 @@
-import { useState, useEffect } from "react";
+// React & Firebase Imports
+import { useState, useEffect, useMemo } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../firebase/firebase";
+
+// Icon Imports
 import { MdKeyboardArrowLeft } from "react-icons/md";
 import { FiClock } from "react-icons/fi";
 import { FaArrowRight } from "react-icons/fa6";
-import { db } from "../firebase/firebase";
-import { collection, addDoc, doc, getDoc } from "firebase/firestore";
-import { useParams } from "react-router-dom"; // Import useParams to read URL parameters
-import { useNavigate } from "react-router-dom";
-import { useMemo } from "react";
 
 function Quiz() {
+  // URL parameter to identify which quiz to load
   const { quizName } = useParams();
-  const [questions, setQuestions] = useState([]);
-  const [loading, setLoading] = useState(true); // Add loading state
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [selectedOptions, setSelectedOptions] = useState([]);
-  const [showResult, SetShowResult] = useState(false);
-  const [totalQuestions, setTotalQuestions] = useState(0);
-  const [correctAnswers, setCorrectAnswers] = useState(0);
+  const navigate = useNavigate(); // For navigation between routes
 
-  const navigate = useNavigate(); // Initialize navigation
+  // State Variables
+  const [questions, setQuestions] = useState([]); // Stores all quiz questions
+  const [loading, setLoading] = useState(true); // Loading state
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0); // Tracks current question
+  const [selectedOptions, setSelectedOptions] = useState([]); // Stores user selections
+  const [showResult, SetShowResult] = useState(false); // Whether to show the result
+  const [totalQuestions, setTotalQuestions] = useState(0); // Total questions (for result)
+  const [correctAnswers, setCorrectAnswers] = useState(0); // Total correct answers
 
+  // Fetch quiz data from Firestore on component mount
   useEffect(() => {
     const fetchQuiz = async () => {
       try {
         const quizRef = doc(db, "quizzes", quizName);
         const quizSnap = await getDoc(quizRef);
+
         if (quizSnap.exists()) {
-          setQuestions(quizSnap.data().questions);
-          setSelectedOptions(
-            new Array(quizSnap.data().questions.length).fill("")
-          );
+          const quizData = quizSnap.data();
+          setQuestions(quizData.questions);
+          setSelectedOptions(new Array(quizData.questions.length).fill(""));
         } else {
           console.error("Quiz not found!");
         }
       } catch (error) {
         console.error("Error fetching quiz:", error);
       } finally {
-        setLoading(false); // Stop loading after fetching quiz
+        setLoading(false); // Stop loading
       }
     };
 
     fetchQuiz();
   }, [quizName]);
 
+  // Handle answer selection
   const handleOptionChange = (event) => {
-    console.log(selectedOptions);
     const newSelectedOptions = [...selectedOptions];
     newSelectedOptions[currentQuestionIndex] = event.target.value;
     setSelectedOptions(newSelectedOptions);
 
+    // Auto-advance after 1s (except on last question)
     if (currentQuestionIndex !== questions.length - 1) {
       setTimeout(() => {
         handleNextQuestion();
@@ -56,33 +61,38 @@ function Quiz() {
     }
   };
 
+  // Advance to next question or finish quiz
   const handleNextQuestion = () => {
-    if (currentQuestionIndex === questions.length - 1) {
+    const isLastQuestion = currentQuestionIndex === questions.length - 1;
+
+    if (isLastQuestion) {
       SetShowResult(true);
-      // Update the totalQuestions state
       setTotalQuestions(questions.length);
 
-      // Update the correctAnswers state
-      setCorrectAnswers(
-        selectedOptions.filter(
-          (selected, index) => selected === questions[index].answer
-        ).length
-      );
-      return;
-    } else if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
+      // Count correct answers
+      const correctCount = selectedOptions.filter(
+        (selected, index) => selected === questions[index].answer
+      ).length;
+
+      setCorrectAnswers(correctCount);
     } else {
-      alert("Quiz finished! Your answers: " + JSON.stringify(selectedOptions));
+      setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
     }
   };
+
+  // Navigate to previous question or return to home
   const handlePreviousQuestion = () => {
     if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex(currentQuestionIndex - 1);
+      setCurrentQuestionIndex((prevIndex) => prevIndex - 1);
     } else {
       navigate("/");
     }
   };
+
+  // Calculate quiz progress percentage
   const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+
+  // === Render ===
 
   if (loading) {
     return <p className="message">Loading quiz...</p>;
@@ -95,7 +105,9 @@ function Quiz() {
   return (
     <div className="Quiz">
       {!showResult ? (
+        // === Quiz Interface ===
         <div className="questionContainer">
+          {/* Header Section */}
           <div className="heading">
             <div className="top">
               <div id="left">
@@ -112,10 +124,11 @@ function Quiz() {
               </div>
               <div className="time">
                 <FiClock />
-                <p>10:00</p>
+                <p>10:00</p> {/* Static time display */}
               </div>
             </div>
-            {/* PROGRESS BAR */}
+
+            {/* Progress Bar */}
             <div className="progress-bar-container">
               <div
                 className="progress-bar"
@@ -124,11 +137,14 @@ function Quiz() {
             </div>
           </div>
 
+          {/* Question Content */}
           <div className="question">
             <p>
               Question {currentQuestionIndex + 1} of {questions.length}
             </p>
             <h2>{questions[currentQuestionIndex].question}</h2>
+
+            {/* Options */}
             <div className="options">
               {questions[currentQuestionIndex].options.map((option, index) => (
                 <label
@@ -154,13 +170,14 @@ function Quiz() {
                         : ""
                     }`}
                   >
-                    <span className="check-icon">&#10003;</span>{" "}
-                    {/* Unicode checkmark */}
+                    <span className="check-icon">&#10003;</span>
                   </div>
                 </label>
               ))}
             </div>
           </div>
+
+          {/* Navigation Button */}
           <button onClick={handleNextQuestion} id="nextQuestionButton">
             {currentQuestionIndex === questions.length - 1 ? (
               "Finish"
@@ -172,16 +189,18 @@ function Quiz() {
           </button>
         </div>
       ) : (
+        // === Results View ===
         <div className="results">
           <div className="resultsHeader">
             <h2>Results</h2>
             <p>Here are your answers along with the correct ones.</p>
           </div>
 
+          {/* List of Questions with Answers */}
           <div className="questionsAnswers">
             {questions.map((question, questionIndex) => {
-              const selectedOption = selectedOptions[questionIndex]; // User's chosen answer
-              const correctAnswer = question.answer; // Correct answer from questions list
+              const selectedOption = selectedOptions[questionIndex];
+              const correctAnswer = question.answer;
 
               return (
                 <div key={questionIndex} className="questionAnswer">
@@ -190,19 +209,13 @@ function Quiz() {
                     {question.question}
                   </p>
 
+                  {/* Option Status (Correct / Incorrect) */}
                   <div className="optionsAnswer">
                     {question.options.map((option, optionIndex) => {
-                      // Determine the border color:
                       let optionClass = "";
-                      if (option === correctAnswer) {
-                        optionClass = "correct"; // ✅ Green border for correct answer
-                      }
-                      if (
-                        option === selectedOption &&
-                        option !== correctAnswer
-                      ) {
-                        optionClass = "wrong"; // ❌ Red border for wrong selected answer
-                      }
+                      if (option === correctAnswer) optionClass = "correct";
+                      if (option === selectedOption && option !== correctAnswer)
+                        optionClass = "wrong";
 
                       return (
                         <div
@@ -219,11 +232,15 @@ function Quiz() {
               );
             })}
           </div>
+
+          {/* Final Score */}
           <div className="totalMarks">
             <h3>
               Total Marks: {correctAnswers}/{totalQuestions}
             </h3>
           </div>
+
+          {/* Back to Home */}
           <button id="goToMainButton" onClick={() => navigate("/")}>
             Go to main
           </button>
